@@ -2,7 +2,14 @@ const STORAGE_KEY = "wordnest-data-v1";
 const DAY = 86400000;
 const $ = selector => document.querySelector(selector);
 const $$ = selector => [...document.querySelectorAll(selector)];
-const today = () => new Date().toISOString().slice(0, 10);
+// 本地日期键（原实现用 UTC 日期，东八区每天 0-8 点会把打卡记到"昨天"，导致连续打卡断裂）
+const localDateKey = date => {
+  const d = new Date(date);
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${d.getFullYear()}-${m}-${day}`;
+};
+const today = () => localDateKey(new Date());
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 const daysFromNow = n => new Date(Date.now() + n * DAY).toISOString();
 
@@ -61,7 +68,7 @@ function streak() {
   let n = 0;
   let cursor = new Date();
   if (!data.activity[today()]) cursor = new Date(Date.now() - DAY);
-  while (data.activity[cursor.toISOString().slice(0, 10)]) {
+  while (data.activity[localDateKey(cursor)]) {
     n++;
     cursor = new Date(cursor.getTime() - DAY);
   }
@@ -128,7 +135,7 @@ function renderDashboard() {
   let total = 0;
   const days = [...Array(7)].map((_, i) => {
     const date = new Date(Date.now() - (6 - i) * DAY);
-    const key = date.toISOString().slice(0, 10);
+    const key = localDateKey(date);
     const value = data.activity[key] || 0;
     total += value;
     return { label: "日一二三四五六"[date.getDay()], value };
@@ -313,6 +320,7 @@ function recordQuizResult(word, correct) {
   if (correct) word.correct++;
   word.interval = correct ? Math.max(1, Math.round((word.interval || 1) * word.ease)) : 0;
   word.due = correct ? daysFromNow(word.interval) : new Date(Date.now() + 60000).toISOString();
+  word.status = wordStatus(word); // 与闪卡模式保持一致：拼写/选择题也应推进掌握状态
   data.activity[today()] = (data.activity[today()] || 0) + 1;
   data.xp += correct ? 10 : 2;
   save();
@@ -343,7 +351,7 @@ function renderStats() {
   const meta = { mastered: ["已掌握", "var(--green)"], learning: ["学习中", "var(--blue)"], new: ["未学习", "var(--muted)"] };
   $("#masteryChart").innerHTML = Object.entries(meta).map(([key, [label, color]]) => `<div class="master-row"><span>${label}</span><div><i style="width:${counts[key] / total * 100}%;background:${color}"></i></div><b>${counts[key]}</b></div>`).join("");
   $("#heatmap").innerHTML = [...Array(91)].map((_, i) => {
-    const key = new Date(Date.now() - (90 - i) * DAY).toISOString().slice(0, 10);
+    const key = localDateKey(new Date(Date.now() - (90 - i) * DAY));
     const value = data.activity[key] || 0;
     const level = value ? Math.min(4, Math.ceil(value / 4)) : 0;
     return `<span class="heat-cell" data-level="${level}" title="${key}: ${value} 次"></span>`;
