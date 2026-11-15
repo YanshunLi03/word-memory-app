@@ -430,7 +430,7 @@ function bindEvents() {
   $$('[data-close]').forEach(b => b.addEventListener("click", () => $("#wordDialog").close()));
   ["#searchInput", "#deckFilter", "#statusFilter"].forEach(id => $(id).addEventListener("input", renderLibrary));
   $("#wordTable").addEventListener("click", e => {
-    const id = e.target.dataset.edit || e.target.dataset.delete || e.target.dataset.speak;
+    const id = e.target.dataset.id || e.target.dataset.edit || e.target.dataset.delete || e.target.dataset.speak;
     if (e.target.dataset.edit) openWordDialog(id);
     if (e.target.dataset.speak) speak(data.words.find(w => w.id === id).word);
     if (e.target.dataset.delete && confirm("确定删除这个单词吗？")) { data.words = data.words.filter(w => w.id !== id); save(); renderLibrary(); }
