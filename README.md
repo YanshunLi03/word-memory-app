@@ -72,7 +72,7 @@ word-memory-app/
 └─ .gitignore
 ```
 
-## 数据说明
+## 数据说明：
 
 - 浏览器数据键名：`wordnest-data-v1`
 - 清除站点数据会删除学习进度，请定期导出 JSON 备份
