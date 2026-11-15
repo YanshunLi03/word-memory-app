@@ -1,0 +1,9 @@
+{
+  "name": "WordNest 单词记忆",
+  "short_name": "WordNest",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f4f5fb",
+  "theme_color": "#635bff",
+  "icons": [{"src":"assets/icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+}
